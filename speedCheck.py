@@ -30,8 +30,8 @@ from threading import Lock
 Variables to change for your system
 """
 
-line_sep = '\r\n'  # use this one for linux
-# line_sep = '\n'  # use this one for Windows
+# line_sep = '\r\n'  # use this one for linux
+line_sep = '\n'  # use this one for Windows
 
 low_download_speed = 25  # what you consider to be a low Download Speed in Mbit/s
 low_upload_speed = 1  # what you consider to be a low Upload Speed in Mbit/s
@@ -98,9 +98,6 @@ def empty_line(length):
 class SpeedTest:
     import time
 
-    global line_sep, times, low_download_speed, low_upload_speed
-    global time_spend_file_name, speed_test_results_file_name, low_speed_test_results_file_name
-
     state_lock = Lock()
 
     def __init__(self):
@@ -109,22 +106,24 @@ class SpeedTest:
         self.current_State = self.states[0]
 
     def progress_bar(self):
+        global line_sep, times, time_spend_file_name
+
         # default time if no time has been recorded before.
         # I recommend changing these to the values that are near the real one at your machine
         # Layout: [searching server time, Download speed check time, Upload speed check time]
-        times = self.times
+        local_times = times
         try:
-            f = open(self.time_spend_file_name, "r")
+            f = open(time_spend_file_name, "r")
             line = f.readline()
             times2 = line.split(";")
             f.close()
             for i in range(0, 3):
-                times[i] = float(times2[i])
+                local_times[i] = float(times2[i])
         except FileNotFoundError:
             pass
-        total_time = times[0] + times[1] + times[2]  # total estimated time needed for the test
+        total_time = local_times[0] + local_times[1] + local_times[2]  # total estimated time needed for the test
         # The different percentages of the 3 Steps
-        percentage = [times[0] / total_time * 100, times[1] / total_time * 100, times[2] / total_time * 100]
+        percentage = [local_times[0] / total_time * 100, local_times[1] / total_time * 100, local_times[2] / total_time * 100]
         percentage[1] += percentage[0]
         percentage[2] += percentage[1]
         time_per_percentage = total_time / 100  # time to wait between 1%
@@ -159,7 +158,7 @@ class SpeedTest:
                 progress(i, 100, used_state, not same)  # drawing new progress bar
             elif used_state == self.states[3]:  # Finished speed test state
                 progress(100, 100, used_state, True)  # drawing 100% progress bar
-                print(self.line_sep)
+                print(line_sep)
                 return
             else:  # This should never occur
                 empty_line(last)
@@ -168,7 +167,9 @@ class SpeedTest:
             i += 1
             time.sleep(time_per_percentage)
 
-    def doSpeedTest(self, progressBar):
+    def do_speed_test(self, progress_bar):
+        global line_sep, low_download_speed, low_upload_speed
+        global speed_test_results_file_name, low_speed_test_results_file_name
         # insert here the server id's where you want to test your connection
         # if empty it will search for the nearest server to your machine
         # for example all the Frankfurt, Germany Servers:
@@ -176,7 +177,7 @@ class SpeedTest:
         servers = []
         times = [0, 0, 0]  # the times that will be recorded in this session
         s = speedtest.Speedtest()
-        progressBar.start()  # start the progressBar Thread
+        progress_bar.start()  # start the progressBar Thread
 
         begin = self.time.time()  # take the time the server search has started
         s.get_servers(servers)  # get all the server that match the filter
@@ -205,38 +206,38 @@ class SpeedTest:
         progress_bar.join()  # wait for the progress bar to finish
         f = open(speed_test_results_file_name, "a+")  # open file to store speed results
 
-        low_download_speed = self.low_download_speed
-        low_upload_speed = self.low_upload_speed
+        local_low_download_speed = low_download_speed
+        local_low_upload_speed = low_upload_speed
         time = datetime.now().strftime('%d.%m.%Y %H:%M')  # get current Date and Time with the format: DD.MM.YYYY HH:MM
 
         # if result is at low Speed ad the prefix
-        if int(results.download / 1000000) < low_download_speed or int(results.upload / 1000000) < low_upload_speed:
-            output = "\t\tLOW SPEED" + self.line_sep
+        if int(results.download / 1000000) < local_low_download_speed or int(results.upload / 1000000) < local_low_upload_speed:
+            output = "\t\tLOW SPEED" + line_sep
         else:
-            output = self.line_sep
+            output = line_sep
 
         # format all the result
-        output2 = "\tDownload: " + str(int(results.download / 1000000)) + " Mbits/s" + self.line_sep
-        output2 += "\tUpload: " + str(int(results.upload / 1000000)) + " Mbits/s" + self.line_sep
-        output2 += "\tPing " + str(int(results.ping)) + " ms" + self.line_sep
-        print(time, output, output2, "\tClient: see Text file", self.line_sep, "\tServer: see Text file", self.line_sep)
-        output2 += "\tClient: " + str(results.client) + self.line_sep
-        output2 += "\tServer: " + str(results.server) + self.line_sep
+        output2 = "\tDownload: " + str(int(results.download / 1000000)) + " Mbits/s" + line_sep
+        output2 += "\tUpload: " + str(int(results.upload / 1000000)) + " Mbits/s" + line_sep
+        output2 += "\tPing " + str(int(results.ping)) + " ms" + line_sep
+        print(time, output, output2, "\tClient: see Text file", line_sep, "\tServer: see Text file", line_sep)
+        output2 += "\tClient: " + str(results.client) + line_sep
+        output2 += "\tServer: " + str(results.server) + line_sep
 
         f.write(time + output + output2)  # write results at the end of the file
         f.close()  # close the file
 
         # if speeds are low then add results to the special file
-        if int(results.download / 1000000) < low_download_speed or int(results.upload / 1000000) < low_upload_speed:
-            f2 = open(self.low_speed_test_results_file_name, "a+")  # open file
-            f2.write(time + self.line_sep + output2)  # write results at the end of the file
+        if int(results.download / 1000000) < local_low_download_speed or int(results.upload / 1000000) < local_low_upload_speed:
+            f2 = open(low_speed_test_results_file_name, "a+")  # open file
+            f2.write(time + line_sep + output2)  # write results at the end of the file
             f2.close()  # close the file
         else:  # if speed are normal, store the time it took to the file
-            f3 = open(self.time_spend_file_name, "a+")   # open file
+            f3 = open(time_spend_file_name, "a+")   # open file
             # write times at the end of the file
-            f3.write(str(times[0]) + ";" + str(times[1]) + ";" + str(times[2]) + self.line_sep)
+            f3.write(str(times[0]) + ";" + str(times[1]) + ";" + str(times[2]) + line_sep)
             f3.close()  # close file
-            f3 = open(self.time_spend_file_name, "r")  # open file again
+            f3 = open(time_spend_file_name, "r")  # open file again
             all_lines = f3.readlines()  # get all the lines of the file
             f3.close()  # close the file
             if len(all_lines) > 1:  # if there where mor than 1 test stored compute average
@@ -254,24 +255,25 @@ class SpeedTest:
                 for i in range(0, 3):  # finish computing average and cast into String
                     avr[i] /= len(lines)
                     avr[i] = str(avr[i])
-                output = ";".join(avr) + self.line_sep
+                output = ";".join(avr) + line_sep
                 # replace any unwanted line separators
-                if self.line_sep == '\r\n':
+                if line_sep == '\r\n':
                     not_correct = '\n'
                 else:
                     not_correct = '\r\n'
-                for i in range(1,len(all_lines)):
-                    all_lines[i] = all_lines[i].replace(not_correct, self.line_sep)
+                for i in range(1, len(all_lines)):
+                    all_lines[i] = all_lines[i].replace(not_correct, line_sep)
                 # put average to beginning of file
                 all_lines[0] = output
-                f3 = open(self.time_spend_file_name, "w")  # open file
+                f3 = open(time_spend_file_name, "w")  # open file
                 f3.writelines(all_lines)  # write new values into file
                 f3.close()  # close file
 
 
-# Starts the speed Check with 2 Threads
-speedcheck = SpeedTest()
-progress_bar = Thread(target=speedcheck.progress_bar, args=())
-speedtest2 = Thread(target=speedcheck.doSpeedTest, args=(progress_bar,))
-speedtest2.start()
-speedtest2.join()
+for i in range(0, 5):
+    # Starts the speed Check with 2 Threads
+    speedcheck = SpeedTest()
+    progress_bar = Thread(target=speedcheck.progress_bar, args=())
+    speedtest2 = Thread(target=speedcheck.do_speed_test, args=(progress_bar,))
+    speedtest2.start()
+    speedtest2.join()

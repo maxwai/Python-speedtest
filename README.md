@@ -6,7 +6,7 @@ Python script to test your internet connection. Made for regular testing
 
 ### Prerequisites
 
-You will need Pyhton 3.7 (older version of Python may work but was not tested
+You will need Pyhton 3.7 (older version of Python may work but was not tested)
 
 ### Installing
 
@@ -19,11 +19,11 @@ python speedCheck.py
 ```
 The results will be shown at the end in the Console and the detailled results will be saved by default in the files SpeedTestResults.txt and SpeedTestResultsLow.txt if the Speed is Low
 
-To change the File Names, the line seperator and what is considered Low Download or Upload Speed open [speedCheck.py](speedCheck.py) in an editor and change lines [33](https://github.com/maxwai/Python-speedtest/blob/2e72f14643681be50e3582cdd7bc97e44d2e203d/speedCheck.py#L33) to [41](https://github.com/maxwai/Python-speedtest/blob/2e72f14643681be50e3582cdd7bc97e44d2e203d/speedCheck.py#L41]
+To change the File Names, the line seperator and what is considered Low Download or Upload Speed open [speedCheck.py](speedCheck.py) in an editor and change lines [33](https://github.com/maxwai/Python-speedtest/blob/2e72f14643681be50e3582cdd7bc97e44d2e203d/speedCheck.py#L33) to [41](https://github.com/maxwai/Python-speedtest/blob/2e72f14643681be50e3582cdd7bc97e44d2e203d/speedCheck.py#L41)
 
 ## Deployment
 
-This program is primarely meant for use at a server to be run at specific for example to run it every 3 Hours in a NAS to test and log the Internet Speed at Home. For this pls see how to execute python files on your server
+This program is primarely meant for use at a server to be run at specific times for example to run it every 3 Hours in a NAS to test and log the Internet Speed at Home. For this pls see how to execute python files on your server
 
 ## Authors
 

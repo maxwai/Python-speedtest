@@ -1,4 +1,4 @@
-# Pythong Speedtest
+# Python Speedtest
 
 Python script to test your internet connection. Made for regular testing
 

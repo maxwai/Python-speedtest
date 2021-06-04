@@ -270,10 +270,9 @@ class SpeedTest:
                 f3.close()  # close file
 
 
-for i in range(0, 5):
-    # Starts the speed Check with 2 Threads
-    speedcheck = SpeedTest()
-    progress_bar = Thread(target=speedcheck.progress_bar, args=())
-    speedtest2 = Thread(target=speedcheck.do_speed_test, args=(progress_bar,))
-    speedtest2.start()
-    speedtest2.join()
+# Starts the speed Check with 2 Threads
+speedcheck = SpeedTest()
+progress_bar = Thread(target=speedcheck.progress_bar, args=())
+speedtest2 = Thread(target=speedcheck.do_speed_test, args=(progress_bar,))
+speedtest2.start()
+speedtest2.join()
